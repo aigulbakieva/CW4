@@ -7,7 +7,7 @@ class API(ABC):
     """
 
     @abstractmethod
-    def get_vacancies(self):
+    def get_vacancies(self, vac_name):
         pass
 
     @abstractmethod
