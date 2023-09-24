@@ -34,12 +34,31 @@ class HeadHunter(API):
         hh_vacancies = hh_api.get_vacancies(self.vac_name)
         # return response.json()['items']
         for item in hh_vacancies['items']:
-            salary = item['salary']['from']
+            salary = item['salary']
             if salary is None:
                 vacancy_list.append({
                     'title': item['name'],
                     'url': 'https://hh.ru/vacancy/' + item['id'],
-                    'salary': 0,
+                    'salary_from': 0,
+                    'salary_to': 0,
+                    'requirement': item['snippet']['requirement']
+                })
+
+            elif salary['from'] is None:
+                vacancy_list.append({
+                    'title': item['name'],
+                    'url': 'https://hh.ru/vacancy/' + item['id'],
+                    'salary_from': 0,
+                    'salary_to': salary['to'],
+                    'requirement': item['snippet']['requirement']
+                })
+
+            elif salary['to'] is None:
+                vacancy_list.append({
+                    'title': item['name'],
+                    'url': 'https://hh.ru/vacancy/' + item['id'],
+                    'salary_from': salary['from'],
+                    'salary_to': 0,
                     'requirement': item['snippet']['requirement']
                 })
 
