@@ -12,15 +12,16 @@ class HeadHunter(API):
     HH_AREAS_JSON = 'data/areas/headhunter_areas.json'
 
     def __init__(self):
-        self.vac_name = None
+        pass
 
-    def get_vacancies(self, vac_name):
-        self.vac_name = vac_name
-
+    def get_vacancies(self, keyword):
+        """
+        Метод для получения всех вакансий на платформе HH по API.
+        :param keyword:
+        :return:
+        """
         params = {
-            'text': {self.vac_name},
-            'area': 113,
-            'date': 14,
+            'text': keyword,
             'per_page': 100
         }
 
@@ -28,50 +29,22 @@ class HeadHunter(API):
         # response_data = json.load(response.text)
         return response.json()
 
-    def add_vacancy(self):
+    def formate_vacancies(self, all_vacancies):
+        """
+        Метод для получения информации о вакансиях по заданным параметрам.
+        :param all_vacancies:
+        :return:
+        """
         vacancy_list = []
-        hh_api = HeadHunter()
-        hh_vacancies = hh_api.get_vacancies(self.vac_name)
-        # return response.json()['items']
-        for item in hh_vacancies['items']:
+        for item in all_vacancies['items']:
             salary = item['salary']
-            if salary is None:
-                vacancy_list.append({
-                    'title': item['name'],
-                    'url': 'https://hh.ru/vacancy/' + item['id'],
-                    'salary_from': 0,
-                    'salary_to': 0,
-                    'requirement': item['snippet']['requirement']
-                })
-
-            elif salary['from'] is None:
-                vacancy_list.append({
-                    'title': item['name'],
-                    'url': 'https://hh.ru/vacancy/' + item['id'],
-                    'salary_from': 0,
-                    'salary_to': salary['to'],
-                    'requirement': item['snippet']['requirement']
-                })
-
-            elif salary['to'] is None:
-                vacancy_list.append({
-                    'title': item['name'],
-                    'url': 'https://hh.ru/vacancy/' + item['id'],
-                    'salary_from': salary['from'],
-                    'salary_to': 0,
-                    'requirement': item['snippet']['requirement']
-                })
-
-            else:
-                vacancy_list.append({
-                    'title': item['name'],
-                    'url': 'https://hh.ru/vacancy/' + item['id'],
-                    'salary': salary['from'],
-                    'requirement': item['snippet']['requirement']
-                })
-
+            result = {
+                'title': item['name'],
+                'area': item['area']['name'],
+                'url': 'https://hh.ru/vacancy/' + item['id'],
+                'salary_from': 0 if salary is None or salary['from'] is None else salary['from'],
+                'salary_to': 0 if salary is None or salary['to'] is None else salary['to'],
+                'requirement': item['snippet']['requirement']
+            }
+            vacancy_list.append(result)
         return vacancy_list
-
-    def load_all_areas(self):
-        response = requests.get(self.HH_API_URL_AREAS)
-        return response.json()
